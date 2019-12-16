@@ -4,7 +4,7 @@
 
 # Secrets #
 
-**/*/res/values/secrets.xml
+app/src/main/res/values/secrets.xml
 
 ### Android ###
 # Built application files
