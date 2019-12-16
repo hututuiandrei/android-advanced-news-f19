@@ -2,10 +2,6 @@
 # Created by https://www.gitignore.io/api/linux,macos,windows,android,androidstudio
 # Edit at https://www.gitignore.io/?templates=linux,macos,windows,android,androidstudio
 
-# Secrets #
-
-app/src/main/res/values/secrets.xml
-
 ### Android ###
 # Built application files
 *.apk
