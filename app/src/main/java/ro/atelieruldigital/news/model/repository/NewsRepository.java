@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import ro.atelieruldigital.news.model.APIResponse;
+import ro.atelieruldigital.news.model.News;
 import ro.atelieruldigital.news.model.webservice.NewsWebService;
 
 public class NewsRepository {
@@ -19,19 +19,19 @@ public class NewsRepository {
         newsWebService = new NewsWebService();
     }
 
-    public LiveData<APIResponse> getResponse(String searchString) {
+    public LiveData<News> getNews(String searchString) {
 
-        final MutableLiveData<APIResponse> data = new MutableLiveData<>();
+        final MutableLiveData<News> data = new MutableLiveData<>();
 
-        newsWebService.queryArticles(searchString).enqueue(new Callback<APIResponse>() {
+        newsWebService.queryArticles(searchString).enqueue(new Callback<News>() {
             @Override
-            public void onResponse(Call<APIResponse> call, Response<APIResponse> response) {
+            public void onResponse(Call<News> call, Response<News> response) {
 
                 data.setValue(response.body());
             }
 
             @Override
-            public void onFailure(Call<APIResponse> call, Throwable t) {
+            public void onFailure(Call<News> call, Throwable t) {
 
                 // TODO : error handling
             }

@@ -7,7 +7,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.R;
-import ro.atelieruldigital.news.model.APIResponse;
+import ro.atelieruldigital.news.model.News;
 
 public class NewsWebService {
 
@@ -19,15 +19,15 @@ public class NewsWebService {
         newsApi = NewsApiClient.getClient().create(NewsApi.class);
     }
 
-    public Call<APIResponse> queryArticles(String searchString) {
+    public Call<News> queryArticles(String searchString) {
         return newsApi.queryArticles(searchString, API_KEY);
     }
 
     private interface NewsApi {
 
         @GET("/v2/everything")
-        Call<APIResponse> queryArticles(@Query("q") String searchString,
-                                             @Query("apiKey") String apiKey);
+        Call<News> queryArticles(@Query("q") String searchString,
+                                 @Query("apiKey") String apiKey);
     }
 }
 

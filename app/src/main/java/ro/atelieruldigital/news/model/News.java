@@ -4,16 +4,16 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class APIResponse {
+public class News {
 
     @SerializedName("status")
     private String status;
     @SerializedName("totalResults")
     private int totalResults;
     @SerializedName("articles")
-    List<Article> articleList;
+    private List<Article> articleList;
 
-    public APIResponse(String status, int totalResults, List<Article> articleList) {
+    public News(String status, int totalResults, List<Article> articleList) {
         this.status = status;
         this.totalResults = totalResults;
         this.articleList = articleList;
@@ -31,3 +31,5 @@ public class APIResponse {
         return articleList;
     }
 }
+
+
