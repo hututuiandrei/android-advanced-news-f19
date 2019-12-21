@@ -8,6 +8,7 @@ import retrofit2.http.Query;
 import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.News;
+import timber.log.Timber;
 
 public class NewsWebService {
 
@@ -19,15 +20,34 @@ public class NewsWebService {
         newsApi = NewsApiClient.getClient().create(NewsApi.class);
     }
 
-    public Call<News> queryArticles(String searchString) {
-        return newsApi.queryArticles(searchString, API_KEY);
+    public Call<News> queryArticles(NewsQuerry querry) {
+
+        if(querry.getClass() == TopHeadlinesQuerry.class) {
+
+            TopHeadlinesQuerry top = (TopHeadlinesQuerry) querry;
+
+            return newsApi.queryTopArticles(top.getCategory(),
+                    top.getCountry(),
+                    top.getSources(),
+                    top.getQ(),
+                    top.getPageSize(),
+                    top.getPage(),
+                    API_KEY);
+        }
+
+        return null;
     }
 
     private interface NewsApi {
 
-        @GET("/v2/everything")
-        Call<News> queryArticles(@Query("q") String searchString,
-                                 @Query("apiKey") String apiKey);
+        @GET("/v2/top-headlines")
+        Call<News> queryTopArticles(@Query("category") String category,
+                                    @Query("country") String country,
+                                    @Query("sources") String sources,
+                                    @Query("q") String searchString,
+                                    @Query("pageSize") int pageSize,
+                                    @Query("page") int page,
+                                    @Query("apiKey") String apiKey);
     }
 }
 
