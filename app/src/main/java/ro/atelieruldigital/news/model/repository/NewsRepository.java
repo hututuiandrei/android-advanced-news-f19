@@ -2,6 +2,8 @@ package ro.atelieruldigital.news.model.repository;
 
 import android.app.Application;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -22,7 +24,8 @@ public class NewsRepository {
     private NewsWebService newsWebService;
     private ArticleDao articleDao;
 
-    private LiveData<List<Article>> articleList;
+    private LiveData<List<Article>> articleListEvery;
+    private LiveData<List<Article>> articleListTop;
 
     public NewsRepository(Application application) {
 
@@ -31,28 +34,59 @@ public class NewsRepository {
         ArticleRoomDatabase db = ArticleRoomDatabase.getDatabase(application);
         articleDao = db.wordDao();
 
-        articleList = articleDao.getArticles();
+        articleListTop = articleDao.getArticles("TopHeadlinesQuerry");
+        articleListEvery = articleDao.getArticles("EverythingQuerry");
     }
 
-    public LiveData<List<Article>> getNews() {
+    public LiveData<List<Article>> getNews(String type) {
 
-        return articleList;
+        if(type.equals("EverythingQuerry")) {
+            return articleListEvery;
+        } else {
+            return articleListTop;
+        }
     }
 
     public void syncNews(NewsQuerry querry) {
 
+        String type = querry.getClass().getSimpleName();
+        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
+
+            if(type.equals("EverythingQuerry")) {
+                articleListEvery = articleDao.getArticles(type);
+            } else {
+                articleListTop = articleDao.getArticles(type);
+            }
+        });
+
         newsWebService.queryArticles(querry).enqueue(new Callback<News>() {
             @Override
-            public void onResponse(Call<News> call, Response<News> response) {
+            public void onResponse(@NotNull Call<News> call, @NotNull Response<News> response) {
 
-                insertAll(response.body().getArticleList());
-                articleList = articleDao.getArticles();
+                ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
+                    articleDao.deleteAll(type);
 
-                Timber.d("SUCC %s", response.body().getArticleList().toString());
+                    List<Article> articles = response.body().getArticleList();
+
+                    for(Article article : articles) {
+
+                        article.setType(type);
+                    }
+
+                    articleDao.insertAll(articles);
+                    if(type.equals("EverythingQuerry")) {
+                        articleListEvery = articleDao.getArticles(type);
+                    } else {
+                        articleListTop = articleDao.getArticles(type);
+                    }
+
+                    Timber.d("SUCC %s", articles.toString());
+                });
+
             }
 
             @Override
-            public void onFailure(Call<News> call, Throwable t) {
+            public void onFailure(@NotNull Call<News> call, @NotNull Throwable t) {
 
                 Timber.d("FAIL");
                 // TODO : error handling
@@ -60,10 +94,10 @@ public class NewsRepository {
         });
     }
 
-    private void insertAll(List<Article> articles) {
+    public void clearCache() {
+
         ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-            articleDao.deleteAll();
-            articleDao.insertAll(articles);
+            articleDao.deleteAll("TopHeadlinesQuerry");
         });
     }
 }

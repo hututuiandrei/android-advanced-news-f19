@@ -6,7 +6,6 @@ import android.content.Context;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 
 import ro.atelieruldigital.news.model.repository.NewsRepository;
-import ro.atelieruldigital.news.model.webservice.NewsQuerry;
 import timber.log.Timber;
 
 public class App extends Application {

@@ -20,11 +20,11 @@ public class NewsWebService {
         newsApi = NewsApiClient.getClient().create(NewsApi.class);
     }
 
-    public Call<News> queryArticles(NewsQuerry querry) {
+    public Call<News> queryArticles(NewsQuerry query) {
 
-        if(querry.getClass() == TopHeadlinesQuerry.class) {
+        if(query.getClass() == TopHeadlinesQuerry.class) {
 
-            TopHeadlinesQuerry top = (TopHeadlinesQuerry) querry;
+            TopHeadlinesQuerry top = (TopHeadlinesQuerry) query;
 
             return newsApi.queryTopArticles(top.getCategory(),
                     top.getCountry(),
@@ -32,6 +32,24 @@ public class NewsWebService {
                     top.getQ(),
                     top.getPageSize(),
                     top.getPage(),
+                    API_KEY);
+        }
+
+        if(query.getClass() == EverythingQuerry.class) {
+
+            EverythingQuerry every = (EverythingQuerry) query;
+
+            return newsApi.queryEveryArticles(every.getQ(),
+                    every.getQInTitle(),
+                    every.getSources(),
+                    every.getDomains(),
+                    every.getExcludeDomains(),
+                    every.getFrom(),
+                    every.getTo(),
+                    every.getLanguage(),
+                    every.getSortBy(),
+                    every.getPageSize(),
+                    every.getPage(),
                     API_KEY);
         }
 
@@ -44,7 +62,20 @@ public class NewsWebService {
         Call<News> queryTopArticles(@Query("category") String category,
                                     @Query("country") String country,
                                     @Query("sources") String sources,
-                                    @Query("q") String searchString,
+                                    @Query("q") String q,
+                                    @Query("pageSize") int pageSize,
+                                    @Query("page") int page,
+                                    @Query("apiKey") String apiKey);
+        @GET("/v2/everything")
+        Call<News> queryEveryArticles(@Query("q") String q,
+                                    @Query("qInTitle") String qInTitle,
+                                    @Query("sources") String sources,
+                                    @Query("domains") String domains,
+                                    @Query("excludeDomains") String excludeDomains,
+                                    @Query("from") String from,
+                                    @Query("to") String to,
+                                    @Query("language") String language,
+                                    @Query("sortBy") String sortBy,
                                     @Query("pageSize") int pageSize,
                                     @Query("page") int page,
                                     @Query("apiKey") String apiKey);
