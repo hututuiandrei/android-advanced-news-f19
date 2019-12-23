@@ -12,10 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import ro.atelieruldigital.news.R;
-import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
 import ro.atelieruldigital.news.model.webservice.TopHeadlinesQuerry;
+import ro.atelieruldigital.news.view.adapters.TopPageListAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 
 /**
@@ -23,8 +24,10 @@ import ro.atelieruldigital.news.viewmodel.NewsViewModel;
  */
 public class TopHeadlinesPageFragment extends Fragment {
 
+    private RecyclerView recyclerView;
     private NewsViewModel mNewsViewModel;
-    private TextView mTextView;
+
+    public TopHeadlinesPageFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,24 +38,29 @@ public class TopHeadlinesPageFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         initView();
+        mNewsViewModel = new NewsViewModel(getActivity().getApplication());
+    }
 
-        mNewsViewModel = new ViewModelProvider(this).get(NewsViewModel.class);
-        mNewsViewModel.getnewsObservableTop().observe(getViewLifecycleOwner(), articles -> {
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        final TopPageListAdapter adapter = new TopPageListAdapter(getContext());
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            mTextView.setText(articles.toString());
-        });
+        mNewsViewModel.getnewsObservableTop().observe(getViewLifecycleOwner(), adapter::setArticles);
 
         mNewsViewModel.syncNews(new TopHeadlinesQuerry("ro", "", "", "",
-                10, 1));
+                5, 1));
     }
 
     private void initView() {
 
-        mTextView = getView().findViewById(R.id.textviewtop);
+        recyclerView = (RecyclerView) getView().findViewById(R.id.top_news_recycler_view);
     }
 }

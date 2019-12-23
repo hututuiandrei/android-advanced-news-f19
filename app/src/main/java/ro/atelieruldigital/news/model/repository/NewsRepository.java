@@ -89,7 +89,6 @@ public class NewsRepository {
             public void onFailure(@NotNull Call<News> call, @NotNull Throwable t) {
 
                 Timber.d("FAIL");
-                // TODO : error handling
             }
         });
     }

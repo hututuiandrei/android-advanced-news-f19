@@ -12,19 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
+import ro.atelieruldigital.news.view.adapters.EverythingPageListAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
+import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class EverythingPageFragment extends Fragment {
 
-
+    private RecyclerView recyclerView;
     private NewsViewModel mNewsViewModel;
-    private TextView mTextView;
+
+    public EverythingPageFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,26 +43,31 @@ public class EverythingPageFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         initView();
+        mNewsViewModel = new NewsViewModel(getActivity().getApplication());
+    }
 
-        mNewsViewModel = new ViewModelProvider(this).get(NewsViewModel.class);
-        mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        final EverythingPageListAdapter adapter = new EverythingPageListAdapter(getContext());
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            mTextView.setText(articles.toString());
-        });
+        mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), adapter::setArticles);
 
-        mNewsViewModel.syncNews(new EverythingQuerry("Pizza Hut", "", "",
+        mNewsViewModel.syncNews(new EverythingQuerry("Trump", "", "",
                 "", "", "", "", "", "", 10,
                 1));
     }
 
     private void initView() {
 
-        mTextView = getView().findViewById(R.id.textviewevery);
+        recyclerView = (RecyclerView) getView().findViewById(R.id.every_news_recycler_view);
     }
 
 }
