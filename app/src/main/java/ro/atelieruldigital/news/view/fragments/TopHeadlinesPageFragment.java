@@ -18,6 +18,7 @@ import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.webservice.TopHeadlinesQuerry;
 import ro.atelieruldigital.news.view.adapters.TopPageListAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
+import timber.log.Timber;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,6 +42,8 @@ public class TopHeadlinesPageFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        Timber.d("CREATED");
+
         initView();
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
     }
@@ -49,14 +52,13 @@ public class TopHeadlinesPageFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        Timber.d("RESUMED");
+
         final TopPageListAdapter adapter = new TopPageListAdapter(getContext());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mNewsViewModel.getnewsObservableTop().observe(getViewLifecycleOwner(), adapter::setArticles);
-
-        mNewsViewModel.syncNews(new TopHeadlinesQuerry("ro", "", "", "",
-                5, 1));
     }
 
     private void initView() {

@@ -38,16 +38,17 @@ public class NewsRepository {
         articleListEvery = articleDao.getArticles("EverythingQuerry");
     }
 
-    public LiveData<List<Article>> getNews(String type) {
+    public LiveData<List<Article>> getTopNews() {
 
-        if(type.equals("EverythingQuerry")) {
-            return articleListEvery;
-        } else {
-            return articleListTop;
-        }
+        return articleListTop;
     }
 
-    public void syncNews(NewsQuerry querry) {
+    public LiveData<List<Article>> getEveryNews() {
+
+        return articleListEvery;
+    }
+
+    public void getCachedNews(NewsQuerry querry) {
 
         String type = querry.getClass().getSimpleName();
         ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
@@ -58,6 +59,11 @@ public class NewsRepository {
                 articleListTop = articleDao.getArticles(type);
             }
         });
+    }
+
+    public void getRemoteNews(NewsQuerry querry) {
+
+        String type = querry.getClass().getSimpleName();
 
         newsWebService.queryArticles(querry).enqueue(new Callback<News>() {
             @Override
@@ -74,11 +80,6 @@ public class NewsRepository {
                     }
 
                     articleDao.insertAll(articles);
-                    if(type.equals("EverythingQuerry")) {
-                        articleListEvery = articleDao.getArticles(type);
-                    } else {
-                        articleListTop = articleDao.getArticles(type);
-                    }
 
                     Timber.d("SUCC %s", articles.toString());
                 });
@@ -93,10 +94,10 @@ public class NewsRepository {
         });
     }
 
-    public void clearCache() {
-
-        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-            articleDao.deleteAll("TopHeadlinesQuerry");
-        });
-    }
+//    public void clearCache() {
+//
+//        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
+//            articleDao.deleteAll("TopHeadlinesQuerry");
+//        });
+//    }
 }

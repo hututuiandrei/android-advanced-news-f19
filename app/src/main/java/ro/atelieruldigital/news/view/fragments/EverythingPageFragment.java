@@ -46,6 +46,8 @@ public class EverythingPageFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        Timber.d("CREATED");
+
         initView();
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
     }
@@ -54,15 +56,13 @@ public class EverythingPageFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        Timber.d("RESUMED");
+
         final EverythingPageListAdapter adapter = new EverythingPageListAdapter(getContext());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), adapter::setArticles);
-
-        mNewsViewModel.syncNews(new EverythingQuerry("Trump", "", "",
-                "", "", "", "", "", "", 10,
-                1));
     }
 
     private void initView() {

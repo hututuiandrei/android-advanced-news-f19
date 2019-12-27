@@ -18,12 +18,15 @@ public class NewsViewModel extends AndroidViewModel {
     private final LiveData<List<Article>> newsObservableEvery;
     private NewsRepository mRepository;
 
+    private boolean firstSync;
+
     public NewsViewModel(@NonNull Application application) {
         super(application);
 
         mRepository = this.<App>getApplication().getNewsRepository();
-        newsObservableTop = mRepository.getNews("TopHeadlinesQuerry");
-        newsObservableEvery = mRepository.getNews("EverythingQuerry");
+        newsObservableTop = mRepository.getTopNews();
+        newsObservableEvery = mRepository.getEveryNews();
+        firstSync = true;
     }
 
     /**
@@ -39,11 +42,27 @@ public class NewsViewModel extends AndroidViewModel {
 
     public void syncNews(NewsQuerry querry) {
 
-        mRepository.syncNews(querry);
+        if (firstSync) {
+            getCachedNews(querry);
+            getRemoteNews(querry);
+        } else {
+            getCachedNews(querry);
+        }
+        firstSync = false;
     }
 
-    public void clearCache() {
+    public void getRemoteNews(NewsQuerry querry) {
 
-        mRepository.clearCache();
+        mRepository.getRemoteNews(querry);
     }
+
+    public void getCachedNews(NewsQuerry querry) {
+
+        mRepository.getCachedNews(querry);
+    }
+
+//    public void clearCache() {
+//
+//        mRepository.clearCache();
+//    }
 }
