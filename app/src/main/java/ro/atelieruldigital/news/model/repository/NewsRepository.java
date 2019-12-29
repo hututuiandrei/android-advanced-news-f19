@@ -1,12 +1,15 @@
 package ro.atelieruldigital.news.model.repository;
 
 import android.app.Application;
+import android.widget.TextView;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -14,6 +17,7 @@ import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.News;
 import ro.atelieruldigital.news.model.database.ArticleDao;
 import ro.atelieruldigital.news.model.database.ArticleRoomDatabase;
+import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
 import ro.atelieruldigital.news.model.webservice.NewsQuerry;
 import ro.atelieruldigital.news.model.webservice.NewsWebService;
 import ro.atelieruldigital.news.model.webservice.TopHeadlinesQuerry;
@@ -24,8 +28,11 @@ public class NewsRepository {
     private NewsWebService newsWebService;
     private ArticleDao articleDao;
 
-    private LiveData<List<Article>> articleListEvery;
-    private LiveData<List<Article>> articleListTop;
+    private MutableLiveData<List<Article>> articleListEvery;
+    private MutableLiveData<List<Article>> articleListTop;
+
+    public final static String EVTAG = "EverythingQuerry";
+    public final static String TTAG = "TopHeadlinesQuerry";
 
     public NewsRepository(Application application) {
 
@@ -34,8 +41,8 @@ public class NewsRepository {
         ArticleRoomDatabase db = ArticleRoomDatabase.getDatabase(application);
         articleDao = db.wordDao();
 
-        articleListTop = articleDao.getArticles("TopHeadlinesQuerry");
-        articleListEvery = articleDao.getArticles("EverythingQuerry");
+        articleListEvery = new MutableLiveData<>();
+        articleListTop = new MutableLiveData<>();
     }
 
     public LiveData<List<Article>> getTopNews() {
@@ -51,12 +58,25 @@ public class NewsRepository {
     public void getCachedNews(NewsQuerry querry) {
 
         String type = querry.getClass().getSimpleName();
+        int page = getPageFromQuerry(querry);
+
         ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
 
-            if(type.equals("EverythingQuerry")) {
-                articleListEvery = articleDao.getArticles(type);
-            } else {
-                articleListTop = articleDao.getArticles(type);
+            List<Article> articles = articleDao.getArticles(type, page);
+
+            switch (type) {
+
+                case EVTAG : {
+
+                    articleListEvery.postValue(articles);
+                    break;
+                }
+
+                case TTAG : {
+
+                    articleListTop.postValue(articles);
+                    break;
+                }
             }
         });
     }
@@ -64,25 +84,32 @@ public class NewsRepository {
     public void getRemoteNews(NewsQuerry querry) {
 
         String type = querry.getClass().getSimpleName();
+        int page = getPageFromQuerry(querry);
 
         newsWebService.queryArticles(querry).enqueue(new Callback<News>() {
             @Override
             public void onResponse(@NotNull Call<News> call, @NotNull Response<News> response) {
 
-                ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-                    articleDao.deleteAll(type);
+                if(response.isSuccessful()) {
 
                     List<Article> articles = response.body().getArticleList();
 
-                    for(Article article : articles) {
+                    ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
 
-                        article.setType(type);
-                    }
+                        articleDao.deleteAll(type, page);
 
-                    articleDao.insertAll(articles);
+                        for (Article article : articles) {
 
-                    Timber.d("SUCC %s", articles.toString());
-                });
+                            article.setType(type);
+                            article.setPage(page);
+                        }
+                        articleDao.insertAll(articles);
+                    });
+
+                } else {
+
+                    Timber.d("NO SUCCESSFUL");
+                }
 
             }
 
@@ -94,10 +121,39 @@ public class NewsRepository {
         });
     }
 
-//    public void clearCache() {
+    private int getPageFromQuerry(NewsQuerry querry) {
+
+        String type = querry.getClass().getSimpleName();
+        int page = 0;
+
+        switch (type) {
+
+            case EVTAG : {
+
+                page = ((EverythingQuerry) querry).getPage();
+                break;
+            }
+
+            case TTAG : {
+
+                page =((TopHeadlinesQuerry) querry).getPage();
+                break;
+            }
+        }
+        return page;
+    }
+
+    public void clearCache() {
+
+        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
+            articleDao.deleteAll();
+        });
+    }
+
+//    public void clearCache(String type) {
 //
 //        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-//            articleDao.deleteAll("TopHeadlinesQuerry");
+//            articleDao.deleteAll(type);
 //        });
 //    }
 }

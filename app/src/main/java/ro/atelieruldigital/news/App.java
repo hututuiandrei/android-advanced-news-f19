@@ -26,10 +26,7 @@ public class App extends Application {
 
         newsRepository = new NewsRepository(this);
 
-        //NewsQuerry.TopHeadlines newsQuerry = new NewsQuerry.TopHeadlines("", "", "", "", 0, 0, "");
-
-
-        //newsRepository.syncNews("Pizza Hut");
+//        newsRepository.clearCache();
 
         Timber.d("App has initialized...");
     }

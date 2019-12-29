@@ -10,16 +10,18 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import ro.atelieruldigital.news.R;
+import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
+import ro.atelieruldigital.news.model.webservice.NewsQuerry;
 import ro.atelieruldigital.news.view.adapters.EverythingPageListAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 import timber.log.Timber;
@@ -27,10 +29,15 @@ import timber.log.Timber;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EverythingPageFragment extends Fragment {
+public class EverythingPageFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView recyclerView;
-    private NewsViewModel mNewsViewModel;
+    public static NewsViewModel mNewsViewModel;
+    private EverythingPageListAdapter adapter;
+
+    private int currentPage = 1;
+    private boolean isLoading = false;
+    private SwipeRefreshLayout swipeRefresh;
 
     public EverythingPageFragment() {}
 
@@ -43,13 +50,42 @@ public class EverythingPageFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         Timber.d("CREATED");
 
         initView();
+
+        swipeRefresh.setOnRefreshListener(this);
+
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new EverythingPageListAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                int lastItem = layoutManager.getItemCount();
+
+                if(lastVisibleItem + 1 == lastItem) {
+
+                    if(!isLoading) {
+
+                        Timber.d("BOTTOM");
+                        currentPage++;
+                        startQuerry(currentPage);
+                        isLoading = true;
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -58,16 +94,37 @@ public class EverythingPageFragment extends Fragment {
 
         Timber.d("RESUMED");
 
-        final EverythingPageListAdapter adapter = new EverythingPageListAdapter(getContext());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
 
-        mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), adapter::setArticles);
+            adapter.addArticles(articles);
+            isLoading = false;
+        });
+
+        startQuerry(currentPage);
+    }
+
+    private void startQuerry(int page) {
+
+        NewsQuerry newsQuerry = new EverythingQuerry("Romania", "", "",
+                "", "", "", "", "", "",
+                10, page);
+
+        mNewsViewModel.syncNews(newsQuerry);
+
+        swipeRefresh.setRefreshing(false);
     }
 
     private void initView() {
 
-        recyclerView = (RecyclerView) getView().findViewById(R.id.every_news_recycler_view);
+        recyclerView = getView().findViewById(R.id.every_news_recycler_view);
+        swipeRefresh = getView().findViewById(R.id.swipe_refresh);
     }
 
+    @Override
+    public void onRefresh() {
+
+        adapter.clear();
+        currentPage = 1;
+        startQuerry(currentPage);
+    }
 }

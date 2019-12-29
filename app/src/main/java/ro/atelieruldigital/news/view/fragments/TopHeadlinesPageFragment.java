@@ -26,7 +26,7 @@ import timber.log.Timber;
 public class TopHeadlinesPageFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private NewsViewModel mNewsViewModel;
+    public static NewsViewModel mNewsViewModel;
 
     public TopHeadlinesPageFragment() {}
 

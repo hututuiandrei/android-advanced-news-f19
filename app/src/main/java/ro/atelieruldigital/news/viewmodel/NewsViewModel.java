@@ -11,6 +11,7 @@ import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.repository.NewsRepository;
 import ro.atelieruldigital.news.model.webservice.NewsQuerry;
+import timber.log.Timber;
 
 public class NewsViewModel extends AndroidViewModel {
 
@@ -18,15 +19,12 @@ public class NewsViewModel extends AndroidViewModel {
     private final LiveData<List<Article>> newsObservableEvery;
     private NewsRepository mRepository;
 
-    private boolean firstSync;
-
     public NewsViewModel(@NonNull Application application) {
         super(application);
 
         mRepository = this.<App>getApplication().getNewsRepository();
         newsObservableTop = mRepository.getTopNews();
         newsObservableEvery = mRepository.getEveryNews();
-        firstSync = true;
     }
 
     /**
@@ -42,13 +40,8 @@ public class NewsViewModel extends AndroidViewModel {
 
     public void syncNews(NewsQuerry querry) {
 
-        if (firstSync) {
-            getCachedNews(querry);
-            getRemoteNews(querry);
-        } else {
-            getCachedNews(querry);
-        }
-        firstSync = false;
+        getCachedNews(querry);
+        getRemoteNews(querry);
     }
 
     public void getRemoteNews(NewsQuerry querry) {
@@ -61,8 +54,13 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository.getCachedNews(querry);
     }
 
-//    public void clearCache() {
+    public void clearCache() {
+
+        mRepository.clearCache();
+    }
+
+//    public void clearCache(String type) {
 //
-//        mRepository.clearCache();
+//        mRepository.clearCache(type);
 //    }
 }

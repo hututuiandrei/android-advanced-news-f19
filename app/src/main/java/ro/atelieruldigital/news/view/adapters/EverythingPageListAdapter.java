@@ -1,6 +1,5 @@
 package ro.atelieruldigital.news.view.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,24 +15,31 @@ public class EverythingPageListAdapter extends
         RecyclerView.Adapter<EverythingPageListAdapter.EverythingPageViewHolder>{
 
     class EverythingPageViewHolder extends RecyclerView.ViewHolder {
+
+        private final TextView articleTopIdItemView;
         private final TextView articleTitleItemView;
         private final TextView articleAuthorItemView;
 
         private EverythingPageViewHolder(View itemView) {
             super(itemView);
+
+            articleTopIdItemView = itemView.findViewById(R.id.top_id);
             articleTitleItemView = itemView.findViewById(R.id.articletitle_every_textview);
             articleAuthorItemView = itemView.findViewById(R.id.articleauthor_every_textview);
         }
     }
 
-    private final LayoutInflater mInflater;
     private List<Article> mArticles; // Cached copy of words
 
-    public EverythingPageListAdapter(Context context) { mInflater = LayoutInflater.from(context); }
+    public EverythingPageListAdapter(List<Article> mArticles) {
+        this.mArticles = mArticles;
+    }
 
     @Override
     public EverythingPageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = mInflater.inflate(R.layout.recyclerview_article, parent, false);
+
+        View itemView = LayoutInflater.from(parent.getContext()).
+                inflate(R.layout.recyclerview_article, parent, false);
         return new EverythingPageViewHolder(itemView);
     }
 
@@ -44,12 +50,24 @@ public class EverythingPageListAdapter extends
 
             holder.articleTitleItemView.setText(current.getTitle());
             holder.articleAuthorItemView.setText(current.getAuthor());
+            holder.articleTopIdItemView.setText(String.valueOf(current.getPage()));
         }
     }
 
-    public void setArticles(List<Article> articles){
+    public void addArticles(List<Article> articles){
 
-        mArticles = articles;
+        if(mArticles.isEmpty()) {
+            mArticles = articles;
+        } else {
+            mArticles.addAll(articles);
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public void clear(){
+
+        mArticles.clear();
         notifyDataSetChanged();
     }
 
