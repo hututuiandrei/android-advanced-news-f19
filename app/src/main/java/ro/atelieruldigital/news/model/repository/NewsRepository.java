@@ -104,6 +104,21 @@ public class NewsRepository {
                             article.setPage(page);
                         }
                         articleDao.insertAll(articles);
+
+                        switch (type) {
+
+                            case EVTAG : {
+
+                                articleListEvery.postValue(articleDao.getArticles(type, page));
+                                break;
+                            }
+
+                            case TTAG : {
+
+                                articleListTop.postValue(articleDao.getArticles(type, page));
+                                break;
+                            }
+                        }
                     });
 
                 } else {
@@ -143,17 +158,11 @@ public class NewsRepository {
         return page;
     }
 
-    public void clearCache() {
+    public void clearCache(String type) {
 
         ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-            articleDao.deleteAll();
+
+            articleDao.deleteAll(type);
         });
     }
-
-//    public void clearCache(String type) {
-//
-//        ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
-//            articleDao.deleteAll(type);
-//        });
-//    }
 }

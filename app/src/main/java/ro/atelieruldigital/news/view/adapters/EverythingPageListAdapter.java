@@ -62,7 +62,7 @@ public class EverythingPageListAdapter extends
             mArticles.addAll(articles);
         }
 
-        notifyDataSetChanged();
+        notifyItemRangeInserted(mArticles.size(), articles.size() - 1);
     }
 
     public void clear(){

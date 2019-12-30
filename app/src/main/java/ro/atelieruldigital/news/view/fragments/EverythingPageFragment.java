@@ -74,7 +74,9 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
                 int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
                 int lastItem = layoutManager.getItemCount();
 
-                if(lastVisibleItem + 1 == lastItem) {
+                int offset = 1;
+
+                if(lastVisibleItem + 1 == lastItem - offset) {
 
                     if(!isLoading) {
 
@@ -96,8 +98,11 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
 
         mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
 
-            adapter.addArticles(articles);
-            isLoading = false;
+            if(!articles.isEmpty()) {
+                adapter.addArticles(articles);
+                isLoading = false;
+                swipeRefresh.setRefreshing(false);
+            }
         });
 
         startQuerry(currentPage);
@@ -110,8 +115,6 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
                 10, page);
 
         mNewsViewModel.syncNews(newsQuerry);
-
-        swipeRefresh.setRefreshing(false);
     }
 
     private void initView() {
@@ -124,6 +127,7 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
     public void onRefresh() {
 
         adapter.clear();
+        mNewsViewModel.clearCache("EverythingQuerry");
         currentPage = 1;
         startQuerry(currentPage);
     }

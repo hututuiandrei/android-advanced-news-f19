@@ -54,9 +54,9 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository.getCachedNews(querry);
     }
 
-    public void clearCache() {
+    public void clearCache(String type) {
 
-        mRepository.clearCache();
+        mRepository.clearCache(type);
     }
 
 //    public void clearCache(String type) {

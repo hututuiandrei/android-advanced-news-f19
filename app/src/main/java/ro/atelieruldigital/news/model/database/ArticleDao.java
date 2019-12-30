@@ -21,8 +21,8 @@ public interface ArticleDao {
     @Query("DELETE FROM article_table WHERE type=:type AND page=:page")
     void deleteAll(String type, int page);
 
-    @Query("DELETE FROM article_table")
-    void deleteAll();
+    @Query("DELETE FROM article_table WHERE type=:type")
+    void deleteAll(String type);
 
     @Query("SELECT * FROM article_table WHERE type=:type")
     LiveData<List<Article>> getAllArticles(String type);
