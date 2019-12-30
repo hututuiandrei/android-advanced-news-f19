@@ -31,6 +31,8 @@ public class NewsRepository {
     private MutableLiveData<List<Article>> articleListEvery;
     private MutableLiveData<List<Article>> articleListTop;
 
+    private MutableLiveData<NewsQuerry> currentQuerry;
+
     public final static String EVTAG = "EverythingQuerry";
     public final static String TTAG = "TopHeadlinesQuerry";
 
@@ -43,6 +45,18 @@ public class NewsRepository {
 
         articleListEvery = new MutableLiveData<>();
         articleListTop = new MutableLiveData<>();
+
+        currentQuerry = new MutableLiveData<>();
+    }
+
+    public void setCurrQuerry(NewsQuerry newsQuerry) {
+
+        currentQuerry.setValue(newsQuerry);
+    }
+
+    public LiveData<NewsQuerry> getCurrQuerry() {
+
+        return currentQuerry;
     }
 
     public LiveData<List<Article>> getTopNews() {
@@ -92,6 +106,8 @@ public class NewsRepository {
 
                 if(response.isSuccessful()) {
 
+                    Timber.d("SUCC");
+
                     List<Article> articles = response.body().getArticleList();
 
                     ArticleRoomDatabase.databaseWriteExecutor.execute(() -> {
@@ -110,12 +126,14 @@ public class NewsRepository {
                             case EVTAG : {
 
                                 articleListEvery.postValue(articleDao.getArticles(type, page));
+                                //articleListEvery.postValue(articles);
                                 break;
                             }
 
                             case TTAG : {
 
                                 articleListTop.postValue(articleDao.getArticles(type, page));
+                                //articleListTop.postValue(articles);
                                 break;
                             }
                         }

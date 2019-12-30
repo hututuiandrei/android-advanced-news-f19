@@ -17,6 +17,7 @@ public class NewsViewModel extends AndroidViewModel {
 
     private final LiveData<List<Article>> newsObservableTop;
     private final LiveData<List<Article>> newsObservableEvery;
+    private final LiveData<NewsQuerry> querryObservable;
     private NewsRepository mRepository;
 
     public NewsViewModel(@NonNull Application application) {
@@ -25,6 +26,7 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository = this.<App>getApplication().getNewsRepository();
         newsObservableTop = mRepository.getTopNews();
         newsObservableEvery = mRepository.getEveryNews();
+        querryObservable = mRepository.getCurrQuerry();
     }
 
     /**
@@ -37,6 +39,8 @@ public class NewsViewModel extends AndroidViewModel {
     public LiveData<List<Article>> getNewsObservableEvery() {
         return newsObservableEvery;
     }
+
+    public LiveData<NewsQuerry> getQuerryObservable() {return querryObservable; }
 
     public void syncNews(NewsQuerry querry) {
 
@@ -59,8 +63,8 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository.clearCache(type);
     }
 
-//    public void clearCache(String type) {
-//
-//        mRepository.clearCache(type);
-//    }
+    public void setCurrentQuerry(NewsQuerry newsQuerry) {
+
+        mRepository.setCurrQuerry(newsQuerry);
+    }
 }

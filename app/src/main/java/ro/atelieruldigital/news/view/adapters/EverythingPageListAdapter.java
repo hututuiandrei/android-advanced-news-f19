@@ -56,11 +56,7 @@ public class EverythingPageListAdapter extends
 
     public void addArticles(List<Article> articles){
 
-        if(mArticles.isEmpty()) {
-            mArticles = articles;
-        } else {
-            mArticles.addAll(articles);
-        }
+        mArticles.addAll(articles);
 
         notifyItemRangeInserted(mArticles.size(), articles.size() - 1);
     }
@@ -68,6 +64,7 @@ public class EverythingPageListAdapter extends
     public void clear(){
 
         mArticles.clear();
+
         notifyDataSetChanged();
     }
 

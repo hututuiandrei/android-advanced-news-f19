@@ -108,16 +108,16 @@ public class HomeActivity extends AppCompatActivity {
                     case 0:
 
                         newsQuerry = new TopHeadlinesQuerry("", "", "", searchText,
-                                20, 1);
-                        TopHeadlinesPageFragment.mNewsViewModel.getRemoteNews(newsQuerry);
+                                10, 1);
+                        TopHeadlinesPageFragment.mNewsViewModel.setCurrentQuerry(newsQuerry);
 
                         break;
                     case 1:
 
                         newsQuerry = new EverythingQuerry(searchText, "", "",
                                 "", "", "", "", "", "",
-                                20, 1);
-                        EverythingPageFragment.mNewsViewModel.getRemoteNews(newsQuerry);
+                                10, 1);
+                        EverythingPageFragment.mNewsViewModel.setCurrentQuerry(newsQuerry);
                         break;
                     case 2:
 

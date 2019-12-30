@@ -39,6 +39,8 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
     private boolean isLoading = false;
     private SwipeRefreshLayout swipeRefresh;
 
+    private NewsQuerry currentQuerry = null;
+
     public EverythingPageFragment() {}
 
     @Override
@@ -60,6 +62,11 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
         swipeRefresh.setOnRefreshListener(this);
 
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
+
+        currentQuerry = new EverythingQuerry("", "", "",
+                "", "", "", "", "", "",
+                10, currentPage);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
@@ -88,13 +95,6 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
                 }
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Timber.d("RESUMED");
 
         mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
 
@@ -104,15 +104,22 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
                 swipeRefresh.setRefreshing(false);
             }
         });
+        mNewsViewModel.getQuerryObservable().observe(getViewLifecycleOwner(), querry -> {
 
-        startQuerry(currentPage);
+            currentQuerry = querry;
+            adapter.clear();
+            mNewsViewModel.clearCache("EverythingQuerry");
+            currentPage = 1;
+            startQuerry(currentPage);
+        });
+
+        mNewsViewModel.getCachedNews(currentQuerry);
     }
 
     private void startQuerry(int page) {
 
-        NewsQuerry newsQuerry = new EverythingQuerry("Romania", "", "",
-                "", "", "", "", "", "",
-                10, page);
+        NewsQuerry newsQuerry = currentQuerry;
+        ((EverythingQuerry) newsQuerry).setPage(page);
 
         mNewsViewModel.syncNews(newsQuerry);
     }
@@ -126,9 +133,21 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
     @Override
     public void onRefresh() {
 
-        adapter.clear();
-        mNewsViewModel.clearCache("EverythingQuerry");
-        currentPage = 1;
-        startQuerry(currentPage);
+        if(!((EverythingQuerry) currentQuerry).getQ().isEmpty()) {
+            adapter.clear();
+            mNewsViewModel.clearCache("EverythingQuerry");
+            currentPage = 1;
+            startQuerry(currentPage);
+        } else {
+
+            currentQuerry = new EverythingQuerry("Romania", "", "",
+                    "", "", "", "", "", "",
+                    10, currentPage);
+            adapter.clear();
+            mNewsViewModel.clearCache("EverythingQuerry");
+            currentPage = 1;
+            startQuerry(currentPage);
+        }
+
     }
 }
