@@ -11,7 +11,7 @@ import timber.log.Timber;
 public class App extends Application {
 
     private static Context mContext;
-    private NewsRepository newsRepository;
+    private static NewsRepository newsRepository;
 
     @Override
     public void onCreate() {
@@ -34,7 +34,7 @@ public class App extends Application {
         return mContext;
     }
 
-    public NewsRepository getNewsRepository() {
+    public static NewsRepository getNewsRepository() {
         return newsRepository;
     }
 }

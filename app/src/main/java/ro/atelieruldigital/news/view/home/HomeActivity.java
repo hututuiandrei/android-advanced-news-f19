@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
+import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
 import ro.atelieruldigital.news.model.webservice.NewsQuerry;
@@ -45,7 +46,6 @@ public class HomeActivity extends AppCompatActivity {
         initView();
 
         // Instantiate a ViewPager2 and a PagerAdapter.
-
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(this);
 

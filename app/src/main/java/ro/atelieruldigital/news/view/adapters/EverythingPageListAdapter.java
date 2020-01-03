@@ -10,6 +10,7 @@ import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.Article;
+import timber.log.Timber;
 
 public class EverythingPageListAdapter extends
         RecyclerView.Adapter<EverythingPageListAdapter.EverythingPageViewHolder>{
@@ -57,14 +58,39 @@ public class EverythingPageListAdapter extends
     public void addArticles(List<Article> articles){
 
         mArticles.addAll(articles);
-
         notifyItemRangeInserted(mArticles.size(), articles.size() - 1);
+
+    }
+
+    public void replaceArticles(List<Article> articles){
+
+        int size = articles.size();
+        int size1 = mArticles.size();
+
+        for(int i = 0; i < size; i++) {
+
+            mArticles.set(size1 - i - 1, articles.get(size - i - 1));
+        }
+
+        notifyItemRangeChanged(mArticles.size() - size, size - 1);
+
+    }
+
+    public void removeArticles() {
+
+        int size = mArticles.size();
+
+        for (int i = 0; i < 10; i++) {
+
+            mArticles.remove(size - i - 1);
+        }
+        notifyItemRangeRemoved(size - 10, 9);
     }
 
     public void clear(){
 
-        mArticles.clear();
 
+        mArticles.clear();
         notifyDataSetChanged();
     }
 

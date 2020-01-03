@@ -1,6 +1,8 @@
 package ro.atelieruldigital.news.view.fragments;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -36,8 +38,14 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
     private EverythingPageListAdapter adapter;
 
     private int currentPage = 1;
+    private int lastPage = 10;
     private boolean isLoading = false;
     private SwipeRefreshLayout swipeRefresh;
+
+    private Article emptyArticle = new Article(0, "", 0, null, "", "",
+            "", "", "", "", "");
+
+    private List<Article> emptyArticleList = new ArrayList<>();
 
     private NewsQuerry currentQuerry = null;
 
@@ -55,6 +63,11 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        for(int i = 0; i < 10; i++) {
+
+            emptyArticleList.add(emptyArticle);
+        }
+
         Timber.d("CREATED");
 
         initView();
@@ -63,7 +76,7 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
 
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
 
-        currentQuerry = new EverythingQuerry("", "", "",
+        currentQuerry = new EverythingQuerry("Romania", "", "",
                 "", "", "", "", "", "",
                 10, currentPage);
 
@@ -81,13 +94,17 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
                 int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
                 int lastItem = layoutManager.getItemCount();
 
-                int offset = 1;
+                int offset = 0;
+
+                Timber.d(lastVisibleItem + " " + lastItem);
 
                 if(lastVisibleItem + 1 == lastItem - offset) {
 
-                    if(!isLoading) {
+                    if(!isLoading && currentPage < lastPage) {
 
                         Timber.d("BOTTOM");
+
+                        recyclerView.post(() -> { adapter.addArticles(emptyArticleList); });
                         currentPage++;
                         startQuerry(currentPage);
                         isLoading = true;
@@ -96,24 +113,28 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
             }
         });
 
+        // Observe changes in article list
         mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
 
+            Timber.d("CHANGED");
+
             if(!articles.isEmpty()) {
-                adapter.addArticles(articles);
+                recyclerView.post(() -> { adapter.replaceArticles(articles); });
                 isLoading = false;
-                swipeRefresh.setRefreshing(false);
             }
+            swipeRefresh.setRefreshing(false);
         });
+
+        // Observe changes in current querry. This is triggered by searching for new articles in
+        // Home Activity
         mNewsViewModel.getQuerryObservable().observe(getViewLifecycleOwner(), querry -> {
 
             currentQuerry = querry;
-            adapter.clear();
-            mNewsViewModel.clearCache("EverythingQuerry");
-            currentPage = 1;
-            startQuerry(currentPage);
+            onRefresh();
         });
 
-        mNewsViewModel.getCachedNews(currentQuerry);
+        recyclerView.post(() -> adapter.addArticles(emptyArticleList));
+        startQuerry(currentPage);
     }
 
     private void startQuerry(int page) {
@@ -130,24 +151,25 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
         swipeRefresh = getView().findViewById(R.id.swipe_refresh);
     }
 
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
+    }
+
     @Override
     public void onRefresh() {
 
-        if(!((EverythingQuerry) currentQuerry).getQ().isEmpty()) {
+        if(isNetworkConnected()) {
+            isLoading = true;
             adapter.clear();
             mNewsViewModel.clearCache("EverythingQuerry");
             currentPage = 1;
+            recyclerView.post(() -> adapter.addArticles(emptyArticleList));
             startQuerry(currentPage);
         } else {
 
-            currentQuerry = new EverythingQuerry("Romania", "", "",
-                    "", "", "", "", "", "",
-                    10, currentPage);
-            adapter.clear();
-            mNewsViewModel.clearCache("EverythingQuerry");
-            currentPage = 1;
-            startQuerry(currentPage);
+            swipeRefresh.setRefreshing(false);
         }
-
     }
 }

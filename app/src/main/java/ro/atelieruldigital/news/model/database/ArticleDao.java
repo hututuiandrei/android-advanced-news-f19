@@ -12,7 +12,7 @@ import ro.atelieruldigital.news.model.Article;
 @Dao
 public interface ArticleDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Article> articles);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
