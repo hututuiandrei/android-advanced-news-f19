@@ -1,11 +1,9 @@
 package ro.atelieruldigital.news.model.repository;
 
 import android.app.Application;
-import android.widget.TextView;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import androidx.lifecycle.LiveData;
@@ -17,10 +15,10 @@ import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.News;
 import ro.atelieruldigital.news.model.database.ArticleDao;
 import ro.atelieruldigital.news.model.database.ArticleRoomDatabase;
-import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
-import ro.atelieruldigital.news.model.webservice.NewsQuerry;
+import ro.atelieruldigital.news.model.EverythingQuerry;
+import ro.atelieruldigital.news.model.NewsQuerry;
 import ro.atelieruldigital.news.model.webservice.NewsWebService;
-import ro.atelieruldigital.news.model.webservice.TopHeadlinesQuerry;
+import ro.atelieruldigital.news.model.TopHeadlinesQuerry;
 import timber.log.Timber;
 
 public class NewsRepository {
@@ -31,7 +29,8 @@ public class NewsRepository {
     private MutableLiveData<List<Article>> articleListEvery;
     private MutableLiveData<List<Article>> articleListTop;
 
-    private MutableLiveData<NewsQuerry> currentQuerry;
+    private MutableLiveData<NewsQuerry> currentQuerryTop;
+    private MutableLiveData<NewsQuerry> currentQuerryEvery;
 
     public final static String EVTAG = "EverythingQuerry";
     public final static String TTAG = "TopHeadlinesQuerry";
@@ -46,18 +45,29 @@ public class NewsRepository {
         articleListEvery = new MutableLiveData<>();
         articleListTop = new MutableLiveData<>();
 
-        currentQuerry = new MutableLiveData<>();
+        currentQuerryTop = new MutableLiveData<>();
+        currentQuerryEvery = new MutableLiveData<>();
     }
 
-    public void setCurrQuerry(NewsQuerry newsQuerry) {
+    public void setCurrQuerryTop(NewsQuerry newsQuerry) {
 
-        currentQuerry.setValue(newsQuerry);
+        currentQuerryTop.setValue(newsQuerry);
     }
 
-    public LiveData<NewsQuerry> getCurrQuerry() {
+    public LiveData<NewsQuerry> getCurrQuerryTop() {
 
-        return currentQuerry;
+        return currentQuerryTop;
     }
+
+    public void setCurrQuerryEvery(NewsQuerry newsQuerry) {
+        currentQuerryEvery.setValue(newsQuerry);
+    }
+
+    public LiveData<NewsQuerry> getCurrQuerryEvery() {
+
+        return currentQuerryEvery;
+    }
+
 
     public LiveData<List<Article>> getTopNews() {
 

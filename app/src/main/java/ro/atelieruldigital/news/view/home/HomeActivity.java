@@ -12,17 +12,13 @@ import android.widget.TextView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.R;
-import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
-import ro.atelieruldigital.news.model.webservice.NewsQuerry;
-import ro.atelieruldigital.news.model.webservice.TopHeadlinesQuerry;
+import ro.atelieruldigital.news.model.NewsQuerry;
 import ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter;
-import ro.atelieruldigital.news.view.fragments.EverythingPageFragment;
-import ro.atelieruldigital.news.view.fragments.TopHeadlinesPageFragment;
+import ro.atelieruldigital.news.view.fragments.FilterFragment;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 import timber.log.Timber;
 
@@ -30,6 +26,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private ViewPager2 viewPager;
     private FragmentStateAdapter pagerAdapter;
+    private FilterFragment filterFragment;
 
     private BottomNavigationView bottomNavigationView;
 
@@ -38,6 +35,8 @@ public class HomeActivity extends AppCompatActivity {
     private ImageButton mImageButtonSearch;
     private ImageButton mImageButtonClose;
 
+    private NewsViewModel newsViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +44,9 @@ public class HomeActivity extends AppCompatActivity {
 
         initView();
 
+        newsViewModel = new NewsViewModel(getApplication());
+
+        filterFragment = new FilterFragment();
         // Instantiate a ViewPager2 and a PagerAdapter.
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(this);
@@ -74,6 +76,8 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+
+                closeFilterArticle(null);
 
                 switch (position) {
 
@@ -107,17 +111,18 @@ public class HomeActivity extends AppCompatActivity {
 
                     case 0:
 
-                        newsQuerry = new TopHeadlinesQuerry("", "", "", searchText,
-                                10, 1);
-                        TopHeadlinesPageFragment.mNewsViewModel.setCurrentQuerry(newsQuerry);
+                        newsQuerry = newsViewModel.getQuerryObservable("TopHeadlinesQuerry").getValue();
+                        newsQuerry.setNewPage(1);
+                        newsQuerry.setNewQ(searchText);
+                        newsViewModel.setCurrentQuerry("TopHeadlinesQuerry", newsQuerry);
 
                         break;
                     case 1:
 
-                        newsQuerry = new EverythingQuerry(searchText, "", "",
-                                "", "", "", "", "", "",
-                                10, 1);
-                        EverythingPageFragment.mNewsViewModel.setCurrentQuerry(newsQuerry);
+                        newsQuerry = newsViewModel.getQuerryObservable("EverythingQuerry").getValue();
+                        newsQuerry.setNewPage(1);
+                        newsQuerry.setNewQ(searchText);
+                        newsViewModel.setCurrentQuerry("EverythingQuerry", newsQuerry);
                         break;
                     case 2:
 
@@ -184,6 +189,36 @@ public class HomeActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager)view.getContext().
                 getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public void openFilterArticle(View view) {
+
+        Timber.d("FILTER");
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.enter, R.anim.exit);
+        ft.replace(R.id.filter_placeholder, filterFragment);
+        ft.commit();
+    }
+
+    public void closeFilterArticle(View view) {
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.enter, R.anim.exit);
+        ft.remove(filterFragment);
+        ft.commit();
+
+        filterFragment.closeFilterArticle(view);
+    }
+
+    public void applyFilters(View view) {
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(R.anim.enter, R.anim.exit);
+        ft.remove(filterFragment);
+        ft.commit();
+
+        filterFragment.applyFilters(view);
     }
 }
 

@@ -10,14 +10,14 @@ import androidx.lifecycle.LiveData;
 import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.repository.NewsRepository;
-import ro.atelieruldigital.news.model.webservice.NewsQuerry;
-import timber.log.Timber;
+import ro.atelieruldigital.news.model.NewsQuerry;
 
 public class NewsViewModel extends AndroidViewModel {
 
     private final LiveData<List<Article>> newsObservableTop;
     private final LiveData<List<Article>> newsObservableEvery;
-    private final LiveData<NewsQuerry> querryObservable;
+    private final LiveData<NewsQuerry> querryObservableTop;
+    private final LiveData<NewsQuerry> querryObservableEvery;
     private NewsRepository mRepository;
 
     public NewsViewModel(@NonNull Application application) {
@@ -26,21 +26,34 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository = this.<App>getApplication().getNewsRepository();
         newsObservableTop = mRepository.getTopNews();
         newsObservableEvery = mRepository.getEveryNews();
-        querryObservable = mRepository.getCurrQuerry();
+        querryObservableTop = mRepository.getCurrQuerryTop();
+        querryObservableEvery = mRepository.getCurrQuerryEvery();
     }
 
     /**
      * Expose the LiveData Projects query so the UI can observe it.
      */
-    public LiveData<List<Article>> getnewsObservableTop() {
-        return newsObservableTop;
+
+    public LiveData<List<Article>> getNewsObservable(String tag) {
+
+        switch (tag) {
+
+            case "EverythingQuerry": return newsObservableEvery;
+            case "TopHeadlinesQuerry": return newsObservableTop;
+            default: return null;
+        }
     }
 
-    public LiveData<List<Article>> getNewsObservableEvery() {
-        return newsObservableEvery;
+    public LiveData<NewsQuerry> getQuerryObservable(String tag) {
+
+        switch (tag) {
+
+            case "EverythingQuerry": return querryObservableEvery;
+            case "TopHeadlinesQuerry": return querryObservableTop;
+            default: return null;
+        }
     }
 
-    public LiveData<NewsQuerry> getQuerryObservable() {return querryObservable; }
 
     public void syncNews(NewsQuerry querry) {
 
@@ -63,8 +76,13 @@ public class NewsViewModel extends AndroidViewModel {
         mRepository.clearCache(type);
     }
 
-    public void setCurrentQuerry(NewsQuerry newsQuerry) {
+    public void setCurrentQuerry(String tag, NewsQuerry newsQuerry) {
 
-        mRepository.setCurrQuerry(newsQuerry);
+        switch (tag) {
+
+            case "EverythingQuerry": mRepository.setCurrQuerryEvery(newsQuerry); break;
+            case "TopHeadlinesQuerry": mRepository.setCurrQuerryTop(newsQuerry); break;
+        }
     }
+
 }

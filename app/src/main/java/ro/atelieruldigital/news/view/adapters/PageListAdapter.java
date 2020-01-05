@@ -10,18 +10,17 @@ import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.Article;
-import timber.log.Timber;
 
-public class EverythingPageListAdapter extends
-        RecyclerView.Adapter<EverythingPageListAdapter.EverythingPageViewHolder>{
+public class PageListAdapter extends
+        RecyclerView.Adapter<PageListAdapter.PageViewHolder>{
 
-    class EverythingPageViewHolder extends RecyclerView.ViewHolder {
+    class PageViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView articleTopIdItemView;
         private final TextView articleTitleItemView;
         private final TextView articleAuthorItemView;
 
-        private EverythingPageViewHolder(View itemView) {
+        private PageViewHolder(View itemView) {
             super(itemView);
 
             articleTopIdItemView = itemView.findViewById(R.id.top_id);
@@ -32,20 +31,20 @@ public class EverythingPageListAdapter extends
 
     private List<Article> mArticles; // Cached copy of words
 
-    public EverythingPageListAdapter(List<Article> mArticles) {
+    public PageListAdapter(List<Article> mArticles) {
         this.mArticles = mArticles;
     }
 
     @Override
-    public EverythingPageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public PageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View itemView = LayoutInflater.from(parent.getContext()).
                 inflate(R.layout.recyclerview_article, parent, false);
-        return new EverythingPageViewHolder(itemView);
+        return new PageViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(EverythingPageViewHolder holder, int position) {
+    public void onBindViewHolder(PageViewHolder holder, int position) {
         if (mArticles != null) {
             Article current = mArticles.get(position);
 
@@ -70,25 +69,11 @@ public class EverythingPageListAdapter extends
         for(int i = 0; i < size; i++) {
 
             mArticles.set(size1 - i - 1, articles.get(size - i - 1));
+            notifyItemChanged(size1 - i - 1);
         }
-
-        notifyItemRangeChanged(mArticles.size() - size, size - 1);
-
-    }
-
-    public void removeArticles() {
-
-        int size = mArticles.size();
-
-        for (int i = 0; i < 10; i++) {
-
-            mArticles.remove(size - i - 1);
-        }
-        notifyItemRangeRemoved(size - 10, 9);
     }
 
     public void clear(){
-
 
         mArticles.clear();
         notifyDataSetChanged();

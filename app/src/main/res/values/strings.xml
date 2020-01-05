@@ -7,5 +7,10 @@
     <string name="sources">Sources</string>
     <string name="everything">Everything</string>
     <string name="headlines">Headlines</string>
-    <string name="search">Search...</string>
+    <string name="search">Search…</string>
+    <string name="select_category">Select category…</string>
+    <string name="select_country">Select country…</string>
+    <string name="search_sources">Search sources…</string>
+    <string name="filters">Filters</string>
+    <string name="apply">Apply</string>
 </resources>

@@ -16,26 +16,27 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.Article;
-import ro.atelieruldigital.news.model.webservice.EverythingQuerry;
-import ro.atelieruldigital.news.model.webservice.NewsQuerry;
-import ro.atelieruldigital.news.view.adapters.EverythingPageListAdapter;
+import ro.atelieruldigital.news.model.NewsQuerry;
+import ro.atelieruldigital.news.view.adapters.PageListAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
+import ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter;
 import timber.log.Timber;
+
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.KEY;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EverythingPageFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView recyclerView;
     public static NewsViewModel mNewsViewModel;
-    private EverythingPageListAdapter adapter;
+    private PageListAdapter adapter;
 
     private int currentPage = 1;
     private int lastPage = 10;
@@ -46,17 +47,23 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
             "", "", "", "", "");
 
     private List<Article> emptyArticleList = new ArrayList<>();
-
     private NewsQuerry currentQuerry = null;
+    private String TAG;
 
-    public EverythingPageFragment() {}
+    private boolean activityFirstResume = false;
+
+    public ArticlePageFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        if (getArguments() != null) {
+            TAG = getArguments().getString(KEY);
+        }
+
         return (ViewGroup) inflater.inflate(
-                R.layout.fragment_everything_page, container, false);
+                R.layout.fragment_article_page, container, false);
     }
 
     @Override
@@ -76,14 +83,12 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
 
         mNewsViewModel = new NewsViewModel(getActivity().getApplication());
 
-        currentQuerry = new EverythingQuerry("Romania", "", "",
-                "", "", "", "", "", "",
-                10, currentPage);
+        currentQuerry = ScreenSlidePagerAdapter.getInitialQuerry(TAG);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new EverythingPageListAdapter(new ArrayList<>());
+        adapter = new PageListAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -104,7 +109,7 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
 
                         Timber.d("BOTTOM");
 
-                        recyclerView.post(() -> { adapter.addArticles(emptyArticleList); });
+                        recyclerView.post(() -> adapter.addArticles(emptyArticleList));
                         currentPage++;
                         startQuerry(currentPage);
                         isLoading = true;
@@ -114,12 +119,12 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
         });
 
         // Observe changes in article list
-        mNewsViewModel.getNewsObservableEvery().observe(getViewLifecycleOwner(), articles -> {
+        mNewsViewModel.getNewsObservable(TAG).observe(getViewLifecycleOwner(), articles -> {
 
             Timber.d("CHANGED");
 
             if(!articles.isEmpty()) {
-                recyclerView.post(() -> { adapter.replaceArticles(articles); });
+                recyclerView.post(() -> adapter.replaceArticles(articles));
                 isLoading = false;
             }
             swipeRefresh.setRefreshing(false);
@@ -127,20 +132,27 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
 
         // Observe changes in current querry. This is triggered by searching for new articles in
         // Home Activity
-        mNewsViewModel.getQuerryObservable().observe(getViewLifecycleOwner(), querry -> {
+        mNewsViewModel.getQuerryObservable(TAG).observe(getViewLifecycleOwner(), querry -> {
 
             currentQuerry = querry;
             onRefresh();
         });
+    }
 
-        recyclerView.post(() -> adapter.addArticles(emptyArticleList));
-        startQuerry(currentPage);
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(!activityFirstResume) {
+            mNewsViewModel.setCurrentQuerry(TAG, currentQuerry);
+            activityFirstResume = true;
+        }
     }
 
     private void startQuerry(int page) {
 
         NewsQuerry newsQuerry = currentQuerry;
-        ((EverythingQuerry) newsQuerry).setPage(page);
+        newsQuerry.setNewPage(page);
 
         mNewsViewModel.syncNews(newsQuerry);
     }
@@ -163,7 +175,7 @@ public class EverythingPageFragment extends Fragment implements SwipeRefreshLayo
         if(isNetworkConnected()) {
             isLoading = true;
             adapter.clear();
-            mNewsViewModel.clearCache("EverythingQuerry");
+            mNewsViewModel.clearCache(TAG);
             currentPage = 1;
             recyclerView.post(() -> adapter.addArticles(emptyArticleList));
             startQuerry(currentPage);

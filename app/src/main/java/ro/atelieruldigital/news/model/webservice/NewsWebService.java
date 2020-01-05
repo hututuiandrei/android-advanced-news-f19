@@ -7,8 +7,10 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 import ro.atelieruldigital.news.App;
 import ro.atelieruldigital.news.R;
+import ro.atelieruldigital.news.model.EverythingQuerry;
 import ro.atelieruldigital.news.model.News;
-import timber.log.Timber;
+import ro.atelieruldigital.news.model.NewsQuerry;
+import ro.atelieruldigital.news.model.TopHeadlinesQuerry;
 
 public class NewsWebService {
 
