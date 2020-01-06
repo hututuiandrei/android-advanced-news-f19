@@ -16,8 +16,9 @@ import ro.atelieruldigital.news.view.fragments.SourcesPageFragment;
 public class ScreenSlidePagerAdapter extends FragmentStateAdapter {
 
     private static final int NUM_PAGES = 3;
-    private static final String TOPTAG = "TopHeadlinesQuerry";
-    private static final String EVERYTAG = "EverythingQuerry";
+    public static final String TOPTAG = "TopHeadlinesQuerry";
+    public static final String EVERYTAG = "EverythingQuerry";
+    public static final String SOURCETAG = "SourcesQuerry";
     public static final String KEY = "key";
 
     public ScreenSlidePagerAdapter(FragmentActivity fa) {
@@ -57,12 +58,12 @@ public class ScreenSlidePagerAdapter extends FragmentStateAdapter {
 
         switch (tag) {
 
-            case TOPTAG: return new TopHeadlinesQuerry("ro", "", "",
-                    "", 10, 1);
+            case TOPTAG: return new TopHeadlinesQuerry(null, null, null,
+                    null, 10, 1);
 
 
-            case EVERYTAG: return new EverythingQuerry("Romania", "", "",
-                    "", "", "", "", "", "",
+            case EVERYTAG: return new EverythingQuerry(null, null, null,
+                    null, null, null, null, null, null,
                     10, 1);
 
             default: return null;

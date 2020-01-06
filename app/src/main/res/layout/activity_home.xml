@@ -9,9 +9,7 @@
     <FrameLayout
         android:id="@+id/filter_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="match_parent"
         android:translationZ="10dp">
     </FrameLayout>
 

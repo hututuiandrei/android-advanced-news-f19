@@ -2,6 +2,7 @@ package ro.atelieruldigital.news.view.home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -22,11 +23,19 @@ import ro.atelieruldigital.news.view.fragments.FilterFragment;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 import timber.log.Timber;
 
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.EVERYTAG;
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.KEY;
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.SOURCETAG;
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.TOPTAG;
+
 public class HomeActivity extends AppCompatActivity {
 
     private ViewPager2 viewPager;
     private FragmentStateAdapter pagerAdapter;
-    private FilterFragment filterFragment;
+    private FilterFragment filterFragmentEvery;
+    private FilterFragment filterFragmentTop;
+    private FilterFragment filterFragmentSources;
+    private FilterFragment currentFilterFragment;
 
     private BottomNavigationView bottomNavigationView;
 
@@ -46,7 +55,23 @@ public class HomeActivity extends AppCompatActivity {
 
         newsViewModel = new NewsViewModel(getApplication());
 
-        filterFragment = new FilterFragment();
+        Bundle bundle;
+
+        bundle = new Bundle();
+        bundle.putString(KEY, EVERYTAG);
+        filterFragmentEvery = new FilterFragment();
+        filterFragmentEvery.setArguments(bundle);
+
+        bundle = new Bundle();
+        bundle.putString(KEY, TOPTAG);
+        filterFragmentTop = new FilterFragment();
+        filterFragmentTop.setArguments(bundle);
+
+        bundle = new Bundle();
+        bundle.putString(KEY, SOURCETAG);
+        filterFragmentSources = new FilterFragment();
+        filterFragmentSources.setArguments(bundle);
+
         // Instantiate a ViewPager2 and a PagerAdapter.
         viewPager = findViewById(R.id.pager);
         pagerAdapter = new ScreenSlidePagerAdapter(this);
@@ -77,26 +102,28 @@ public class HomeActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
 
-                closeFilterArticle(null);
-
                 switch (position) {
 
                     case 0:
 
+                        currentFilterFragment = filterFragmentTop;
                         bottomNavigationView.setSelectedItemId(R.id.action_top);
                         mTextViewTitleBar.setText("Headlines");
                         break;
                     case 1:
 
+                        currentFilterFragment = filterFragmentEvery;
                         bottomNavigationView.setSelectedItemId(R.id.action_everything);
                         mTextViewTitleBar.setText("Everything");
                         break;
                     case 2:
 
+                        currentFilterFragment = filterFragmentSources;
                         bottomNavigationView.setSelectedItemId(R.id.action_sources);
                         mTextViewTitleBar.setText("Sources");
                         break;
                 }
+
             }
         });
 
@@ -104,6 +131,7 @@ public class HomeActivity extends AppCompatActivity {
             if (i == EditorInfo.IME_ACTION_SEARCH) {
 
                 String searchText = textView.getText().toString();
+                if(searchText.isEmpty()) searchText = null;
 
                 NewsQuerry newsQuerry;
 
@@ -111,18 +139,18 @@ public class HomeActivity extends AppCompatActivity {
 
                     case 0:
 
-                        newsQuerry = newsViewModel.getQuerryObservable("TopHeadlinesQuerry").getValue();
+                        newsQuerry = newsViewModel.getQuerryObservable(TOPTAG).getValue();
                         newsQuerry.setNewPage(1);
                         newsQuerry.setNewQ(searchText);
-                        newsViewModel.setCurrentQuerry("TopHeadlinesQuerry", newsQuerry);
+                        newsViewModel.setCurrentQuerry(TOPTAG, newsQuerry);
 
                         break;
                     case 1:
 
-                        newsQuerry = newsViewModel.getQuerryObservable("EverythingQuerry").getValue();
+                        newsQuerry = newsViewModel.getQuerryObservable(EVERYTAG).getValue();
                         newsQuerry.setNewPage(1);
                         newsQuerry.setNewQ(searchText);
-                        newsViewModel.setCurrentQuerry("EverythingQuerry", newsQuerry);
+                        newsViewModel.setCurrentQuerry(EVERYTAG, newsQuerry);
                         break;
                     case 2:
 
@@ -148,6 +176,16 @@ public class HomeActivity extends AppCompatActivity {
 
             resetBar(mEditTextSearchBar);
         }
+
+        //TODO: Resolve bug when backpressing crashes app when filter fragment is on
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        Timber.d("TOUCHED");
+
+        return super.onTouchEvent(event);
     }
 
     private void initView() {
@@ -197,7 +235,7 @@ public class HomeActivity extends AppCompatActivity {
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter, R.anim.exit);
-        ft.replace(R.id.filter_placeholder, filterFragment);
+        ft.replace(R.id.filter_placeholder, currentFilterFragment);
         ft.commit();
     }
 
@@ -205,20 +243,20 @@ public class HomeActivity extends AppCompatActivity {
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter, R.anim.exit);
-        ft.remove(filterFragment);
+        ft.remove(currentFilterFragment);
         ft.commit();
 
-        filterFragment.closeFilterArticle(view);
+        currentFilterFragment.closeFilterArticle(view);
     }
 
     public void applyFilters(View view) {
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter, R.anim.exit);
-        ft.remove(filterFragment);
+        ft.remove(currentFilterFragment);
         ft.commit();
 
-        filterFragment.applyFilters(view);
+        currentFilterFragment.applyFilters(view);
     }
 }
 

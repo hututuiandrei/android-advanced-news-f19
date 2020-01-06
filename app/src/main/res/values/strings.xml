@@ -13,4 +13,13 @@
     <string name="search_sources">Search sources…</string>
     <string name="filters">Filters</string>
     <string name="apply">Apply</string>
+    <string name="search_in_title">Search in title...</string>
+    <string name="search_domains">Search domains...</string>
+    <string name="exclude_domains">Exclude domains...</string>
+    <string name="from">From...</string>
+    <string name="to">To...</string>
+    <string name="search_country">Search country...</string>
+    <string name="search_category">Search category...</string>
+    <string name="search_language">Search language...</string>
+    <string name="sort_by">Sort by...</string>
 </resources>

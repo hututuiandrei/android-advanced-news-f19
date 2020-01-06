@@ -10,6 +10,7 @@ import java.util.List;
 import androidx.recyclerview.widget.RecyclerView;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.Article;
+import timber.log.Timber;
 
 public class PageListAdapter extends
         RecyclerView.Adapter<PageListAdapter.PageViewHolder>{
@@ -70,6 +71,17 @@ public class PageListAdapter extends
 
             mArticles.set(size1 - i - 1, articles.get(size - i - 1));
             notifyItemChanged(size1 - i - 1);
+        }
+
+        for(int i = 0; i < mArticles.size(); i++) {
+
+            if(mArticles.get(i).getPage() == 0) {
+
+                Timber.d("REMOVED");
+                notifyItemRemoved(i);
+                mArticles.remove(i);
+                i--;
+            }
         }
     }
 
