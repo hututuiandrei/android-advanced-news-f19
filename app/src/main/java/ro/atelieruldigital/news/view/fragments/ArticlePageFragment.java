@@ -4,11 +4,6 @@ package ro.atelieruldigital.news.view.fragments;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +11,9 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -23,10 +21,11 @@ import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.Article;
 import ro.atelieruldigital.news.model.NewsQuerry;
 import ro.atelieruldigital.news.view.adapters.PageListAdapter;
-import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 import ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter;
+import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 import timber.log.Timber;
 
+import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.ARTICLE_PER_PAGE;
 import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.KEY;
 
 /**
@@ -39,7 +38,6 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
     private PageListAdapter adapter;
 
     private int currentPage = 1;
-    private int lastPage = 10;
     private boolean isLoading = false;
     private SwipeRefreshLayout swipeRefresh;
 
@@ -62,7 +60,7 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
             TAG = getArguments().getString(KEY);
         }
 
-        return (ViewGroup) inflater.inflate(
+        return inflater.inflate(
                 R.layout.fragment_article_page, container, false);
     }
 
@@ -70,7 +68,7 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < ARTICLE_PER_PAGE; i++) {
 
             emptyArticleList.add(emptyArticle);
         }
@@ -105,7 +103,7 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
 
                 if(lastVisibleItem + 1 == lastItem - offset) {
 
-                    if(!isLoading && currentPage < lastPage) {
+                    if(!isLoading) {
 
                         Timber.d("BOTTOM");
 
@@ -134,8 +132,10 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
         // Home Activity
         mNewsViewModel.getQuerryObservable(TAG).observe(getViewLifecycleOwner(), querry -> {
 
+            Timber.d("CHANGED QUERRY");
             currentQuerry = querry;
             onRefresh();
+
         });
     }
 
@@ -144,7 +144,9 @@ public class ArticlePageFragment extends Fragment implements SwipeRefreshLayout.
         super.onResume();
 
         if(!activityFirstResume) {
-            mNewsViewModel.setCurrentQuerry(TAG, currentQuerry);
+
+            recyclerView.post(() -> adapter.addArticles(emptyArticleList));
+            startQuerry(currentPage);
             activityFirstResume = true;
         }
     }

@@ -20,6 +20,7 @@ public class ScreenSlidePagerAdapter extends FragmentStateAdapter {
     public static final String EVERYTAG = "EverythingQuerry";
     public static final String SOURCETAG = "SourcesQuerry";
     public static final String KEY = "key";
+    public static final int ARTICLE_PER_PAGE = 20;
 
     public ScreenSlidePagerAdapter(FragmentActivity fa) {
         super(fa);
@@ -58,13 +59,13 @@ public class ScreenSlidePagerAdapter extends FragmentStateAdapter {
 
         switch (tag) {
 
-            case TOPTAG: return new TopHeadlinesQuerry(null, null, null,
-                    null, 10, 1);
+            case TOPTAG: return new TopHeadlinesQuerry("us", null, null,
+                    null, ARTICLE_PER_PAGE, 1);
 
 
-            case EVERYTAG: return new EverythingQuerry(null, null, null,
+            case EVERYTAG: return new EverythingQuerry("America", null, null,
                     null, null, null, null, null, null,
-                    10, 1);
+                    ARTICLE_PER_PAGE, 1);
 
             default: return null;
         }

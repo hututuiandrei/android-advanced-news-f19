@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import ro.atelieruldigital.news.R;
 import ro.atelieruldigital.news.model.NewsQuerry;
 import ro.atelieruldigital.news.utils.DataSingleton;
+import ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter;
 import ro.atelieruldigital.news.viewmodel.NewsViewModel;
 
 import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.EVERYTAG;
@@ -27,7 +28,7 @@ import static ro.atelieruldigital.news.view.adapters.ScreenSlidePagerAdapter.TOP
 public class FilterFragment extends Fragment{
 
 
-    public static NewsViewModel mNewsViewModel;
+    private static NewsViewModel mNewsViewModel;
 
     private MaterialSpinner dropdownCountries;
     private MaterialSpinner dropdownCategories;
@@ -145,6 +146,11 @@ public class FilterFragment extends Fragment{
     public void applyFilters(View view) {
 
         NewsQuerry newsQuerry = mNewsViewModel.getQuerryObservable(TAG).getValue();
+
+        if(newsQuerry == null) {
+
+            newsQuerry = ScreenSlidePagerAdapter.getInitialQuerry(TAG);
+        }
 
         String searchSources = editTextSources.getText().toString();
         String searchInTitle = editTextInTitle.getText().toString();

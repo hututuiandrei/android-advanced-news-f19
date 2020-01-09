@@ -140,6 +140,10 @@ public class HomeActivity extends AppCompatActivity {
                     case 0:
 
                         newsQuerry = newsViewModel.getQuerryObservable(TOPTAG).getValue();
+                        if(newsQuerry == null) {
+
+                            newsQuerry = ScreenSlidePagerAdapter.getInitialQuerry(TOPTAG);
+                        }
                         newsQuerry.setNewPage(1);
                         newsQuerry.setNewQ(searchText);
                         newsViewModel.setCurrentQuerry(TOPTAG, newsQuerry);
@@ -148,6 +152,10 @@ public class HomeActivity extends AppCompatActivity {
                     case 1:
 
                         newsQuerry = newsViewModel.getQuerryObservable(EVERYTAG).getValue();
+                        if(newsQuerry == null) {
+
+                            newsQuerry = ScreenSlidePagerAdapter.getInitialQuerry(EVERYTAG);
+                        }
                         newsQuerry.setNewPage(1);
                         newsQuerry.setNewQ(searchText);
                         newsViewModel.setCurrentQuerry(EVERYTAG, newsQuerry);
@@ -166,6 +174,9 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        closeFilterArticle(null);
+
         if (viewPager.getCurrentItem() == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
@@ -176,8 +187,6 @@ public class HomeActivity extends AppCompatActivity {
 
             resetBar(mEditTextSearchBar);
         }
-
-        //TODO: Resolve bug when backpressing crashes app when filter fragment is on
     }
 
     @Override

@@ -1,9 +1,14 @@
 package ro.atelieruldigital.news.view.adapters;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -17,18 +22,40 @@ public class PageListAdapter extends
 
     class PageViewHolder extends RecyclerView.ViewHolder {
 
-        private final TextView articleTopIdItemView;
+//        private final TextView articleTopIdItemView;
         private final TextView articleTitleItemView;
-        private final TextView articleAuthorItemView;
+        private final TextView articleDescriptionItemView;
+        private final ImageView articleImageItemView;
+        private final TextView articlePublishedAtItemView;
+        private final TextView articleContentItemView;
+        private final TextView readMoreItemView;
 
         private PageViewHolder(View itemView) {
             super(itemView);
 
-            articleTopIdItemView = itemView.findViewById(R.id.top_id);
-            articleTitleItemView = itemView.findViewById(R.id.articletitle_every_textview);
-            articleAuthorItemView = itemView.findViewById(R.id.articleauthor_every_textview);
+//            articleTopIdItemView = itemView.findViewById(R.id.top_id);
+            articleTitleItemView = itemView.findViewById(R.id.articletitle_textview);
+            articleDescriptionItemView = itemView.findViewById(R.id.articledescription_textview);
+            articleImageItemView = itemView.findViewById(R.id.articleimage_textview);
+            articlePublishedAtItemView = itemView.findViewById(R.id.articlepublishedat_textview);
+            articleContentItemView = itemView.findViewById(R.id.articlecontent_textview);
+            readMoreItemView = itemView.findViewById(R.id.readmore_textview);
+
+            readMoreItemView.setOnClickListener( v -> {
+
+                Article clickedItem = mArticles.get(getAdapterPosition());
+                String articleUrl = clickedItem.getUrl();
+                if(!articleUrl.isEmpty()) {
+                    Intent readMoreIntent = new Intent(Intent.ACTION_VIEW);
+                    readMoreIntent.setData(Uri.parse(articleUrl));
+                    v.getContext().startActivity(readMoreIntent);
+                }
+            });
         }
     }
+//
+//    private void onItemClicked(Article article, int position){
+//    }
 
     private List<Article> mArticles; // Cached copy of words
 
@@ -50,8 +77,37 @@ public class PageListAdapter extends
             Article current = mArticles.get(position);
 
             holder.articleTitleItemView.setText(current.getTitle());
-            holder.articleAuthorItemView.setText(current.getAuthor());
-            holder.articleTopIdItemView.setText(String.valueOf(current.getPage()));
+            holder.articleDescriptionItemView.setText(current.getDescription());
+            holder.articlePublishedAtItemView.setText(current.getPublishedAt());
+            holder.articleContentItemView.setText(current.getContent());
+
+            String imageUrl = current.getUrlToImage();
+
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+
+                Picasso.with(holder.itemView.getContext())
+                        .load(imageUrl)
+                        .fit()
+                        .centerInside()
+                        .into(holder.articleImageItemView);
+            } else {
+
+                Timber.d("IMAGE NONE");
+                Picasso.with(holder.itemView.getContext())
+                        .load(R.drawable.ic_launcher_background)
+                        .fit()
+                        .centerInside()
+                        .into(holder.articleImageItemView);
+            }
+//
+//            if(current.getTop_id() > 0) {
+//
+//                holder.articleTopIdItemView.setText(String.valueOf(current.getPage()));
+//
+//            } else {
+//
+//                holder.articleTopIdItemView.setText("");
+//            }
         }
     }
 
@@ -67,10 +123,14 @@ public class PageListAdapter extends
         int size = articles.size();
         int size1 = mArticles.size();
 
+        Timber.d("SIZE " + size + " " + size1);
+
         for(int i = 0; i < size; i++) {
 
-            mArticles.set(size1 - i - 1, articles.get(size - i - 1));
-            notifyItemChanged(size1 - i - 1);
+            if(size1 - i - 1 >= 0) {
+                mArticles.set(size1 - i - 1, articles.get(size - i - 1));
+                notifyItemChanged(size1 - i - 1);
+            }
         }
 
         for(int i = 0; i < mArticles.size(); i++) {
