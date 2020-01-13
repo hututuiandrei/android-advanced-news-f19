@@ -102,6 +102,10 @@ public class HomeActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
 
+                if(currentFilterFragment != null) {
+                    closeFilterArticle(null);
+                }
+
                 switch (position) {
 
                     case 0:
@@ -123,7 +127,6 @@ public class HomeActivity extends AppCompatActivity {
                         mTextViewTitleBar.setText("Sources");
                         break;
                 }
-
             }
         });
 

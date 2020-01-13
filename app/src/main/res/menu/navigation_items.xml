@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_top"
         android:title="@string/headlines"
-        android:icon="@drawable/ic_launcher_background" />
+        android:icon="@drawable/ic_headlines" />
     <item android:id="@+id/action_everything"
         android:title="@string/everything"
-        android:icon="@drawable/ic_launcher_background" />
+        android:icon="@drawable/ic_everything" />
     <item android:id="@+id/action_sources"
         android:title="@string/sources"
-        android:icon="@drawable/ic_launcher_background" />
+        android:icon="@drawable/ic_sources" />
 </menu>

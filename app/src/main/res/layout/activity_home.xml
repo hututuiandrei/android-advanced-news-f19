@@ -71,8 +71,9 @@
                             android:layout_height="match_parent"
                             android:layout_gravity="center"
                             android:gravity="center"
-                            android:textSize="20sp"
+                            android:textSize="25sp"
                             android:textStyle="bold"
+                            android:fontFamily="@font/fonts"
                             android:text="@string/headlines"
                             android:layout_weight="5" />
                         <ImageButton
@@ -112,10 +113,13 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation_menu"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="45dp"
         android:layout_gravity="start"
         app:menu="@menu/navigation_items"
-        app:itemBackground="@color/colorPrimaryDark"
+        app:itemBackground="@color/colorGrey"
+        app:itemTextColor="@color/bottom_nav_color"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
